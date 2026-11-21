@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Focus Guard</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="popup-header">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="#533afd" stroke-width="2"/>
+          <path d="M8 8L16 16M16 8L8 16" stroke="#533afd" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="logo-text">AI Focus Guard</span>
+      </div>
+      <div class="badge" id="focus-badge">ON</div>
+    </header>
+
+    <div class="global-mode-row" style="display:none">
+      <span class="global-mode-label">Extension</span>
+      <label class="toggle-switch small">
+        <input type="checkbox" id="global-mode-toggle" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <nav class="popup-nav">
+      <button class="nav-btn active" data-tab="home">Home</button>
+      <button class="nav-btn" data-tab="stats">Stats</button>
+      <button class="nav-btn" data-tab="research">Research</button>
+      <button class="nav-btn" data-tab="settings">Settings</button>
+    </nav>
+
+    <main class="popup-content">
+      <section class="tab-panel active" id="tab-home">
+        <div class="focus-toggle-section">
+          <div class="toggle-container">
+            <label class="toggle-switch">
+              <input type="checkbox" id="focus-toggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+            <div class="toggle-label">
+              <span class="toggle-title">Focus Mode</span>
+              <span class="toggle-subtitle" id="toggle-status">Protecting your focus</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="timer-section">
+          <div class="timer-display" id="timer-display">00:00</div>
+          <div class="timer-controls">
+            <button class="timer-btn timer-btn-primary" id="timer-start" title="Start timer">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+              <span>Start</span>
+            </button>
+            <button class="timer-btn timer-btn-secondary" id="timer-pause" title="Pause timer" style="display: none;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              <span>Pause</span>
+            </button>
+            <button class="timer-btn timer-btn-secondary" id="timer-reset" title="Reset timer" style="display: none;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              <span>Reset</span>
+            </button>
+          </div>
+          <div class="timer-progress">
+            <div class="timer-progress-bar">
+              <div class="timer-progress-fill" id="timer-progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="timer-progress-label">
+              <span id="timer-progress-text">0 / 120 min</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-value" id="stat-today">0</span>
+            <span class="stat-label">Blocked Today</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value" id="stat-focus-time">0m</span>
+            <span class="stat-label">Focus Time</span>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+      <button class="action-btn" id="btn-research">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21L16.65 16.65"/>
+          </svg>
+          Productive Research
+        </button>
+      </div>
+
+      <div class="ai-section">
+        <h3 class="ai-title">AI Assistant</h3>
+        <div class="ai-mode-row">
+          <label class="ai-mode-label">AI Research Mode</label>
+          <div class="ai-mode-toggle">
+            <span class="ai-mode-text active">Active</span>
+            <label class="toggle-switch small">
+              <input type="checkbox" id="ai-mode-toggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="ai-mode-text">Inactive</span>
+          </div>
+        </div>
+        <p class="ai-subtitle">Get a live AI research brief from current AI news</p>
+        <button class="action-btn ai-btn" id="btn-ai-research">
+          <span class="ai-btn-text">Generate Research Brief</span>
+        </button>
+        <input type="text" class="ai-topic-input" id="ai-topic-input" placeholder="Topic (e.g. AI agents)" value="artificial intelligence">
+        <div class="ai-output" id="ai-output" style="display: none;">
+          <p id="ai-tip-text"></p>
+        </div>
+      </div>
+      </section>
+
+      <section class="tab-panel" id="tab-stats">
+        <h3 class="section-title">Statistics</h3>
+        
+        <div class="stats-detail">
+          <div class="stat-row">
+            <span class="stat-row-label">This Week</span>
+            <span class="stat-row-value" id="stat-week">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-row-label">This Month</span>
+            <span class="stat-row-value" id="stat-month">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-row-label">All Time</span>
+            <span class="stat-row-value" id="stat-total">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-row-label">Most Blocked</span>
+            <span class="stat-row-value" id="stat-most-blocked">None</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-row-label">Hours Saved</span>
+            <span class="stat-row-value" id="stat-hours-saved">0h</span>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <h4 class="chart-title">Weekly Activity</h4>
+          <div class="bar-chart" id="weekly-chart"></div>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-research">
+        <h3 class="section-title">Productive Research</h3>
+        <p class="section-description">Discover AI news and stay informed about what matters.</p>
+        <button class="primary-btn" id="btn-open-research">
+          Open Research Dashboard
+        </button>
+      </section>
+
+      <section class="tab-panel" id="tab-settings">
+        <h3 class="section-title">Settings</h3>
+        
+        <div class="settings-group">
+          <h4 class="settings-group-title">Platforms</h4>
+          <div class="setting-row">
+            <span class="setting-label">YouTube Shorts</span>
+            <label class="toggle-switch small">
+              <input type="checkbox" class="website-toggle" data-platform="youtube" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <span class="setting-label">Instagram Reels</span>
+            <label class="toggle-switch small">
+              <input type="checkbox" class="website-toggle" data-platform="instagram" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <span class="setting-label">Facebook Reels</span>
+            <label class="toggle-switch small">
+              <input type="checkbox" class="website-toggle" data-platform="facebook" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <span class="setting-label">TikTok</span>
+            <label class="toggle-switch small">
+              <input type="checkbox" class="website-toggle" data-platform="tiktok" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h4 class="settings-group-title">General</h4>
+          <div class="setting-row">
+            <span class="setting-label">Notifications</span>
+            <label class="toggle-switch small">
+              <input type="checkbox" id="notifications-toggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <span class="setting-label">Dark Mode</span>
+            <label class="toggle-switch small">
+              <input type="checkbox" id="dark-mode-toggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h4 class="settings-group-title">Data</h4>
+          <button class="danger-btn" id="btn-reset-stats">Reset Statistics</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="popup-footer">
+      <span class="version">v1.0.0</span>
+    </footer>
+  </div>
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

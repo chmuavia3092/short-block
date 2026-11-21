@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Icon Generator</title>
+</head>
+<body>
+  <h1>AI Focus Guard Icon Generator</h1>
+  <p>Open this file in a browser, right-click each canvas, and "Save image as" to the assets/icons/ folder.</p>
+  
+  <h2>16x16</h2>
+  <canvas id="icon16" width="16" height="16"></canvas>
+  
+  <h2>48x48</h2>
+  <canvas id="icon48" width="48" height="48"></canvas>
+  
+  <h2>128x128</h2>
+  <canvas id="icon128" width="128" height="128"></canvas>
+  
+  <script>
+    function drawIcon(canvasId, size) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      const scale = size / 128;
+      
+      ctx.clearRect(0, 0, size, size);
+      
+      ctx.strokeStyle = '#533afd';
+      ctx.lineWidth = 3 * scale;
+      ctx.lineCap = 'round';
+      
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, 60 * scale, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(40 * scale, 40 * scale);
+      ctx.lineTo(88 * scale, 88 * scale);
+      ctx.moveTo(88 * scale, 40 * scale);
+      ctx.lineTo(40 * scale, 88 * scale);
+      ctx.stroke();
+    }
+    
+    drawIcon('icon16', 16);
+    drawIcon('icon48', 48);
+    drawIcon('icon128', 128);
+  </script>
+</body>
+</html>
