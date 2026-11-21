@@ -1,6 +1,6 @@
 import { CONFIG } from '../../config.js';
-import { formatRelativeTime, escapeHtml } from '../utils/format.js';
-
+import { formatRelativeTime } from '../utils/format.js';
+import { escapeHtml } from '../utils/sanitize.js';
 const API_KEY = CONFIG.NEWS_API_KEY;
 const API_BASE = CONFIG.NEWS_API_BASE;
 

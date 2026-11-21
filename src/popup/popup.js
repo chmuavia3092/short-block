@@ -1,5 +1,6 @@
 import { AIService } from '../services/ai.js';
-import { formatMinutes, escapeHtml } from '../utils/format.js';
+import { formatMinutes } from '../utils/format.js';
+import { escapeHtml } from '../utils/sanitize.js';
 
 class PopupController {
   constructor() {
