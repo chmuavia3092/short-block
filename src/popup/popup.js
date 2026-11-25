@@ -56,6 +56,11 @@ class PopupController {
       this.openResearchPage();
     });
 
+    const openHistoryBtn = document.getElementById('btn-open-history');
+    if (openHistoryBtn) {
+      openHistoryBtn.addEventListener('click', () => this.openHistoryPage());
+    }
+
     document.getElementById('btn-reset-stats').addEventListener('click', () => {
       this.resetStats();
     });
@@ -207,6 +212,11 @@ class PopupController {
 
   openResearchPage() {
     chrome.runtime.sendMessage({ type: 'OPEN_RESEARCH_PAGE' });
+    window.close();
+  }
+
+  openHistoryPage() {
+    chrome.runtime.sendMessage({ type: 'OPEN_HISTORY_PAGE' });
     window.close();
   }
 

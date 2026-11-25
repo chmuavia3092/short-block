@@ -81,7 +81,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["src/pages/research.html"],
+      "resources": ["src/pages/research.html", "src/pages/history.html"],
       "matches": ["<all_urls>"]
     }
   ]

@@ -173,6 +173,20 @@ async function handleMessage(message, sender, sendResponse) {
         break;
       }
 
+      case 'OPEN_HISTORY_PAGE': {
+        chrome.tabs.create({
+          url: chrome.runtime.getURL('src/pages/history.html')
+        });
+        sendResponse({ success: true });
+        break;
+      }
+
+      case 'GET_FOCUS_SESSIONS': {
+        const sessions = await StorageService.get(STORAGE_KEYS.FOCUS_SESSIONS);
+        sendResponse({ sessions: sessions || [] });
+        break;
+      }
+
       case 'GET_BOOKMARKS': {
         const bookmarks = await StorageService.getBookmarks();
         sendResponse({ bookmarks });
