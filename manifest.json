@@ -22,7 +22,7 @@
     "https://tiktok.com/*",
     "https://newsapi.org/*",
     "https://api.bytez.com/*",
-    "https://api.search.brave.com/*"
+    "https://api.langsearch.com/*"
   ],
   "background": {
     "service_worker": "src/background/service-worker.js",

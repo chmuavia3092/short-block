@@ -108,7 +108,7 @@ class ResearchPage {
 
     const apiKeyBtn = document.getElementById('btn-api-key');
     if (apiKeyBtn) {
-      apiKeyBtn.addEventListener('click', () => this.promptBraveApiKey());
+      apiKeyBtn.addEventListener('click', () => this.promptLangSearchApiKey());
     }
 
     document.getElementById('btn-back').addEventListener('click', () => {
@@ -207,16 +207,16 @@ class ResearchPage {
     await this.fetchNewsByCategory(this.currentCategory, forceRefresh);
   }
 
-  async promptBraveApiKey() {
-    const current = await this.getBraveApiKey();
-    const entered = window.prompt('Enter your Brave Search API key:', current || '');
+  async promptLangSearchApiKey() {
+    const current = await this.getLangSearchApiKey();
+    const entered = window.prompt('Enter your LangSearch API key:', current || '');
     if (entered === null) return;
     const key = entered.trim();
     try {
       await new Promise((resolve) => {
-        chrome.storage.local.set({ braveSearchApiKey: key }, resolve);
+        chrome.storage.local.set({ langSearchApiKey: key }, resolve);
       });
-      alert(key ? 'Brave Search API key saved.' : 'Brave Search API key cleared.');
+      alert(key ? 'LangSearch API key saved.' : 'LangSearch API key cleared.');
     } catch (e) {
       alert('Failed to save API key: ' + (e && e.message ? e.message : e));
     }
@@ -260,35 +260,36 @@ class ResearchPage {
     this.showSearchSkeleton();
 
     try {
-      const apiKey = await this.getBraveApiKey();
+      const apiKey = await this.getLangSearchApiKey();
       if (!apiKey) {
         this.renderSearchResults([]);
         const grid = document.getElementById('search-results-grid');
-        grid.innerHTML = '<p class="empty-state">Brave Search API key not configured. Click "Set API Key" or add it to config.js (BRAVE_SEARCH_API_KEY).</p>';
+        grid.innerHTML = '<p class="empty-state">LangSearch API key not configured. Click "Set API Key" or add it to config.js (LANGSEARCH_API_KEY).</p>';
         return;
       }
 
       const count = CONFIG.ITEMS_PER_PAGE;
-      const offset = (this.currentPage - 1) * count;
-      const params = new URLSearchParams({
-        q: query,
-        count: count.toString(),
-        offset: offset.toString()
-      });
-
-      const response = await fetch(`${CONFIG.BRAVE_SEARCH_API_BASE}?${params}`, {
+      const response = await fetch(CONFIG.LANGSEARCH_API_BASE, {
+        method: 'POST',
         headers: {
-          'Accept': 'application/json',
-          'X-Subscription-Token': apiKey
-        }
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + apiKey
+        },
+        body: JSON.stringify({
+          query: query,
+          count: count,
+          contents: { text: true }
+        })
       });
 
       if (!response.ok) {
-        throw new Error(`Brave Search API error: ${response.status}`);
+        throw new Error(`LangSearch API error: ${response.status}`);
       }
 
       const data = await response.json();
-      const results = (data.web && data.web.results) ? data.web.results : [];
+      const results = (data.data && data.data.webPages && data.data.webPages.value)
+        ? data.data.webPages.value
+        : [];
 
       if (!results.length) {
         this.renderSearchResults([]);
@@ -296,14 +297,13 @@ class ResearchPage {
       }
 
       const mapped = results.map((r) => ({
-        title: r.title || '',
+        title: r.name || r.title || '',
         url: r.url || '',
-        description: r.description || ''
+        description: (r.text || r.snippet || '')
       }));
 
-      // Brave does not return a total count; hide pagination unless a full page came back.
-      this.totalResults = mapped.length === count ? (offset + count + 1) : (offset + mapped.length);
-      this.renderBraveResults(mapped);
+      this.totalResults = mapped.length;
+      this.renderLangSearchResults(mapped);
       this.updatePagination();
     } catch (error) {
       console.error('Search error:', error);
@@ -312,12 +312,12 @@ class ResearchPage {
     }
   }
 
-  async getBraveApiKey() {
+  async getLangSearchApiKey() {
     try {
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         const stored = await new Promise((resolve) => {
-          chrome.storage.local.get('braveSearchApiKey', (result) => {
-            resolve(result && result.braveSearchApiKey);
+          chrome.storage.local.get('langSearchApiKey', (result) => {
+            resolve(result && result.langSearchApiKey);
           });
         });
         if (stored) return stored;
@@ -325,19 +325,19 @@ class ResearchPage {
     } catch (e) {
       // Ignore and fall back to config
     }
-    return (CONFIG.BRAVE_SEARCH_API_KEY || '').trim();
+    return (CONFIG.LANGSEARCH_API_KEY || '').trim();
   }
 
-  renderBraveResults(results) {
+  renderLangSearchResults(results) {
     const grid = document.getElementById('search-results-grid');
     if (!results || !results.length) {
       grid.innerHTML = '<p class="empty-state">No results found. Try a different search term.</p>';
       return;
     }
-    grid.innerHTML = results.map((r) => this.createBraveResultCard(r)).join('');
+    grid.innerHTML = results.map((r) => this.createLangSearchResultCard(r)).join('');
   }
 
-  createBraveResultCard(result) {
+  createLangSearchResultCard(result) {
     const safeUrl = sanitizeUrl(result.url);
     return `
       <article class="news-card" data-url="${escapeHtml(safeUrl)}">
