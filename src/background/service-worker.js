@@ -40,14 +40,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 async function handleMessage(message, sender, sendResponse) {
   try {
     switch (message.type) {
-      case 'GET_FOCUS_MODE': {
+      case 'GET_FOCUS_MODE':
+      case 'GET_EXTENSION_ACTIVE':
+      case 'GET_GLOBAL_MODE': {
         const mode = await StorageService.getFocusMode();
-        sendResponse({ enabled: mode });
+        await StorageService.updateSetting('globalMode', mode);
+        sendResponse({ enabled: mode, active: mode });
         break;
       }
 
-      case 'SET_FOCUS_MODE': {
+      case 'SET_FOCUS_MODE':
+      case 'SET_EXTENSION_ACTIVE':
+      case 'SET_GLOBAL_MODE': {
         await StorageService.setFocusMode(message.enabled);
+        await StorageService.updateSetting('globalMode', message.enabled);
         await BadgeService.updateBadge();
 
         if (message.enabled) {
@@ -63,6 +69,10 @@ async function handleMessage(message, sender, sendResponse) {
           tabs.forEach((tab) => {
             chrome.tabs.sendMessage(tab.id, {
               type: 'FOCUS_MODE_CHANGED',
+              enabled: message.enabled
+            }).catch(() => {});
+            chrome.tabs.sendMessage(tab.id, {
+              type: 'EXTENSION_ACTIVE_CHANGED',
               enabled: message.enabled
             }).catch(() => {});
           });
@@ -245,6 +255,14 @@ async function handleMessage(message, sender, sendResponse) {
   }
 }
 
+chrome.runtime.onStartup.addListener(async () => {
+  try {
+    await BadgeService.init();
+  } catch (e) {
+    console.error('Startup init error:', e);
+  }
+});
+
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === 'check-navigation') {
     await checkNavigationState();
@@ -276,7 +294,8 @@ async function checkNavigationState() {
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url) {
     const focusMode = await StorageService.getFocusMode();
-    if (focusMode) {
+    const globalMode = await StorageService.get('globalMode');
+    if (focusMode && globalMode !== false) {
       try {
         chrome.tabs.sendMessage(tabId, { type: 'CHECK_BLOCKING' }).catch(() => {});
       } catch {

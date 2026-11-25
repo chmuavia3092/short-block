@@ -77,18 +77,27 @@ class PopupController {
 
   async loadFocusMode() {
     const response = await this.sendMessage({ type: 'GET_FOCUS_MODE' });
+    const enabled = response.enabled !== false;
     const toggle = document.getElementById('focus-toggle');
     const badge = document.getElementById('focus-badge');
     const status = document.getElementById('toggle-status');
 
-    toggle.checked = response.enabled;
-    badge.textContent = response.enabled ? 'ON' : 'OFF';
-    badge.classList.toggle('off', !response.enabled);
-    status.textContent = response.enabled ? 'Protecting your focus' : 'Focus mode disabled';
+    if (toggle) toggle.checked = enabled;
+    if (badge) {
+      badge.textContent = enabled ? 'ON' : 'OFF';
+      badge.classList.toggle('off', !enabled);
+    }
+    if (status) status.textContent = enabled ? 'Protecting your focus' : 'Focus mode disabled';
+
+    const globalToggle = document.getElementById('global-mode-toggle');
+    const globalStatus = document.getElementById('global-mode-status');
+    if (globalToggle) globalToggle.checked = enabled;
+    if (globalStatus) globalStatus.textContent = enabled ? 'Active' : 'Inactive';
   }
 
   async toggleFocusMode(enabled) {
     await this.sendMessage({ type: 'SET_FOCUS_MODE', enabled });
+    await this.sendMessage({ type: 'UPDATE_SETTING', key: 'globalMode', value: enabled });
     await this.loadFocusMode();
   }
 
@@ -243,12 +252,25 @@ class PopupController {
   }
 
   async toggleGlobalMode(enabled) {
+    // Master Activate / Deactivate: drives blocking + tracking + badge
+    await this.sendMessage({ type: 'SET_FOCUS_MODE', enabled });
     await this.sendMessage({ type: 'UPDATE_SETTING', key: 'globalMode', value: enabled });
+
     const badge = document.getElementById('focus-badge');
     if (badge) {
       badge.textContent = enabled ? 'ON' : 'OFF';
       badge.classList.toggle('off', !enabled);
     }
+
+    const status = document.getElementById('toggle-status');
+    if (status) status.textContent = enabled ? 'Protecting your focus' : 'Focus mode disabled';
+
+    const focusToggle = document.getElementById('focus-toggle');
+    if (focusToggle) focusToggle.checked = enabled;
+
+    const globalStatus = document.getElementById('global-mode-status');
+    if (globalStatus) globalStatus.textContent = enabled ? 'Active' : 'Inactive';
+
     if (!enabled) {
       this.unblockAllTabs();
     }
@@ -263,13 +285,20 @@ class PopupController {
   }
 
   async loadGlobalMode() {
-    const response = await this.sendMessage({ type: 'GET_SETTING', key: 'globalMode' });
-    const enabled = response.value !== false;
+    const response = await this.sendMessage({ type: 'GET_FOCUS_MODE' });
+    const enabled = response.enabled !== false;
+
+    await this.sendMessage({ type: 'UPDATE_SETTING', key: 'globalMode', value: enabled });
+
     const globalToggle = document.getElementById('global-mode-toggle');
     const row = document.querySelector('.global-mode-row');
     if (globalToggle) {
       globalToggle.checked = enabled;
       if (row) row.style.display = 'flex';
+
+      const globalStatus = document.getElementById('global-mode-status');
+      if (globalStatus) globalStatus.textContent = enabled ? 'Active' : 'Inactive';
+
       const badge = document.getElementById('focus-badge');
       if (badge) {
         badge.textContent = enabled ? 'ON' : 'OFF';

@@ -3,7 +3,8 @@
 
   var STORAGE_KEYS = {
     FOCUS_MODE: 'focusMode',
-    WEBSITES: 'websites'
+    WEBSITES: 'websites',
+    GLOBAL_MODE: 'globalMode'
   };
 
   function isShortContentUrl(url) {
@@ -148,13 +149,14 @@
 
   function isEnabled() {
     return new Promise(function (resolve) {
-      chrome.storage.local.get([STORAGE_KEYS.FOCUS_MODE, STORAGE_KEYS.WEBSITES], function (result) {
+      chrome.storage.local.get([STORAGE_KEYS.FOCUS_MODE, STORAGE_KEYS.WEBSITES, STORAGE_KEYS.GLOBAL_MODE], function (result) {
         var focusMode = result[STORAGE_KEYS.FOCUS_MODE] !== false;
+        var globalMode = result[STORAGE_KEYS.GLOBAL_MODE] !== false;
         var platforms = result[STORAGE_KEYS.WEBSITES] || {
           youtube: true, instagram: true, facebook: true, tiktok: true
         };
         var platform = detectPlatform();
-        resolve(focusMode && (platform ? platforms[platform] !== false : true));
+        resolve(focusMode && globalMode && (platform ? platforms[platform] !== false : true));
       });
     });
   }
@@ -242,7 +244,7 @@
   }
 
   chrome.runtime.onMessage.addListener(function (message) {
-    if (message.type === 'FOCUS_MODE_CHANGED') {
+    if (message.type === 'FOCUS_MODE_CHANGED' || message.type === 'EXTENSION_ACTIVE_CHANGED' || message.type === 'GLOBAL_MODE_CHANGED') {
       if (message.enabled) {
         startObserving();
       } else {
@@ -251,6 +253,9 @@
     }
     if (message.type === 'CHECK_BLOCKING') {
       runCheck();
+    }
+    if (message.type === 'UNBLOCK_EXTENSION') {
+      unblock();
     }
   });
 
