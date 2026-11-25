@@ -1,6 +1,9 @@
 export const CONFIG = {
   NEWS_API_KEY: '',
   NEWS_API_BASE: 'https://newsapi.org/v2',
+
+  BRAVE_SEARCH_API_KEY: '',
+  BRAVE_SEARCH_API_BASE: 'https://api.search.brave.com/res/v1/web/search',
   
   DEFAULT_CATEGORIES: [
     'Artificial Intelligence',

@@ -21,7 +21,8 @@
     "https://www.tiktok.com/*",
     "https://tiktok.com/*",
     "https://newsapi.org/*",
-    "https://api.bytez.com/*"
+    "https://api.bytez.com/*",
+    "https://api.search.brave.com/*"
   ],
   "background": {
     "service_worker": "src/background/service-worker.js",

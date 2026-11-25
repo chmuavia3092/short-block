@@ -1,6 +1,6 @@
 import { CONFIG } from '../../config.js';
 import { formatRelativeTime } from '../utils/format.js';
-import { escapeHtml } from '../utils/sanitize.js';
+import { escapeHtml, sanitizeUrl } from '../utils/sanitize.js';
 const API_KEY = CONFIG.NEWS_API_KEY;
 const API_BASE = CONFIG.NEWS_API_BASE;
 
@@ -106,6 +106,11 @@ class ResearchPage {
       this.loadNews(true);
     });
 
+    const apiKeyBtn = document.getElementById('btn-api-key');
+    if (apiKeyBtn) {
+      apiKeyBtn.addEventListener('click', () => this.promptBraveApiKey());
+    }
+
     document.getElementById('btn-back').addEventListener('click', () => {
       window.history.back();
     });
@@ -202,6 +207,21 @@ class ResearchPage {
     await this.fetchNewsByCategory(this.currentCategory, forceRefresh);
   }
 
+  async promptBraveApiKey() {
+    const current = await this.getBraveApiKey();
+    const entered = window.prompt('Enter your Brave Search API key:', current || '');
+    if (entered === null) return;
+    const key = entered.trim();
+    try {
+      await new Promise((resolve) => {
+        chrome.storage.local.set({ braveSearchApiKey: key }, resolve);
+      });
+      alert(key ? 'Brave Search API key saved.' : 'Brave Search API key cleared.');
+    } catch (e) {
+      alert('Failed to save API key: ' + (e && e.message ? e.message : e));
+    }
+  }
+
   async fetchHeadlines(query) {
     const params = new URLSearchParams({
       q: query,
@@ -232,53 +252,109 @@ class ResearchPage {
     if (resetPage) {
       this.currentPage = 1;
     }
-    
+
     this.currentQuery = query;
     this.switchSection('search');
-    
+
     document.getElementById('search-results-title').textContent = `Results for "${query}"`;
     this.showSearchSkeleton();
-    
+
     try {
+      const apiKey = await this.getBraveApiKey();
+      if (!apiKey) {
+        this.renderSearchResults([]);
+        const grid = document.getElementById('search-results-grid');
+        grid.innerHTML = '<p class="empty-state">Brave Search API key not configured. Click "Set API Key" or add it to config.js (BRAVE_SEARCH_API_KEY).</p>';
+        return;
+      }
+
+      const count = CONFIG.ITEMS_PER_PAGE;
+      const offset = (this.currentPage - 1) * count;
       const params = new URLSearchParams({
         q: query,
-        sortBy: 'publishedAt',
-        language: 'en',
-        pageSize: CONFIG.ITEMS_PER_PAGE.toString(),
-        page: this.currentPage.toString(),
-        apiKey: API_KEY
+        count: count.toString(),
+        offset: offset.toString()
       });
-      
-       const response = await fetch(`${API_BASE}/everything?${params}`);
+
+      const response = await fetch(`${CONFIG.BRAVE_SEARCH_API_BASE}?${params}`, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Subscription-Token': apiKey
+        }
+      });
 
       if (!response.ok) {
-        if (response.status === 401 || response.status === 429 || response.status === 426) {
-          this.totalResults = FALLBACK_ARTICLES.length;
-          this.renderSearchResults(FALLBACK_ARTICLES);
-          this.updatePagination();
-          return;
-        }
-        throw new Error(`API error: ${response.status}`);
+        throw new Error(`Brave Search API error: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      this.totalResults = data.totalResults || 0;
-      
-      if (!data.articles) {
+      const results = (data.web && data.web.results) ? data.web.results : [];
+
+      if (!results.length) {
         this.renderSearchResults([]);
         return;
       }
-      
-      const articles = data.articles
-        .filter((article) => article.title && article.title !== '[Removed]')
-        .map((article) => this.sanitizeArticle(article));
-      
-      this.renderSearchResults(articles);
+
+      const mapped = results.map((r) => ({
+        title: r.title || '',
+        url: r.url || '',
+        description: r.description || ''
+      }));
+
+      // Brave does not return a total count; hide pagination unless a full page came back.
+      this.totalResults = mapped.length === count ? (offset + count + 1) : (offset + mapped.length);
+      this.renderBraveResults(mapped);
       this.updatePagination();
     } catch (error) {
       console.error('Search error:', error);
-      this.showError('Search failed. Please try again.');
+      const grid = document.getElementById('search-results-grid');
+      grid.innerHTML = `<p class="empty-state">Search failed: ${escapeHtml(error.message || 'Please try again.')}</p>`;
     }
+  }
+
+  async getBraveApiKey() {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        const stored = await new Promise((resolve) => {
+          chrome.storage.local.get('braveSearchApiKey', (result) => {
+            resolve(result && result.braveSearchApiKey);
+          });
+        });
+        if (stored) return stored;
+      }
+    } catch (e) {
+      // Ignore and fall back to config
+    }
+    return (CONFIG.BRAVE_SEARCH_API_KEY || '').trim();
+  }
+
+  renderBraveResults(results) {
+    const grid = document.getElementById('search-results-grid');
+    if (!results || !results.length) {
+      grid.innerHTML = '<p class="empty-state">No results found. Try a different search term.</p>';
+      return;
+    }
+    grid.innerHTML = results.map((r) => this.createBraveResultCard(r)).join('');
+  }
+
+  createBraveResultCard(result) {
+    const safeUrl = sanitizeUrl(result.url);
+    return `
+      <article class="news-card" data-url="${escapeHtml(safeUrl)}">
+        <div class="news-content">
+          <h3 class="news-title">
+            <a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(result.title)}</a>
+          </h3>
+          <p class="news-summary">${escapeHtml(result.description)}</p>
+          <div class="news-meta">
+            <span class="news-date">${escapeHtml(safeUrl)}</span>
+            <div class="news-actions">
+              <a class="read-more-btn" href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer">Open</a>
+            </div>
+          </div>
+        </div>
+      </article>
+    `;
   }
 
   renderNews(articles) {
