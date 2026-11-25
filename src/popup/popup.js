@@ -61,6 +61,11 @@ class PopupController {
       openHistoryBtn.addEventListener('click', () => this.openHistoryPage());
     }
 
+    const openChatBtn = document.getElementById('btn-open-chat');
+    if (openChatBtn) {
+      openChatBtn.addEventListener('click', () => this.openChatPage());
+    }
+
     document.getElementById('btn-reset-stats').addEventListener('click', () => {
       this.resetStats();
     });
@@ -217,6 +222,11 @@ class PopupController {
 
   openHistoryPage() {
     chrome.runtime.sendMessage({ type: 'OPEN_HISTORY_PAGE' });
+    window.close();
+  }
+
+  openChatPage() {
+    chrome.runtime.sendMessage({ type: 'OPEN_CHAT_PAGE' });
     window.close();
   }
 

@@ -181,6 +181,14 @@ async function handleMessage(message, sender, sendResponse) {
         break;
       }
 
+      case 'OPEN_CHAT_PAGE': {
+        chrome.tabs.create({
+          url: chrome.runtime.getURL('src/pages/chat.html')
+        });
+        sendResponse({ success: true });
+        break;
+      }
+
       case 'GET_FOCUS_SESSIONS': {
         const sessions = await StorageService.get(STORAGE_KEYS.FOCUS_SESSIONS);
         sendResponse({ sessions: sessions || [] });

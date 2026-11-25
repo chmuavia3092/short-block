@@ -2,8 +2,12 @@ export const CONFIG = {
   NEWS_API_KEY: '',
   NEWS_API_BASE: 'https://newsapi.org/v2',
 
-  LANGSEARCH_API_KEY: 'sk-7618971e4cc045938844f10db995439f',
+  LANGSEARCH_API_KEY: '',
   LANGSEARCH_API_BASE: 'https://api.langsearch.com/v1/web-search',
+
+  GROQ_API_KEY: '',
+  GROQ_API_BASE: 'https://api.groq.com/openai/v1/chat/completions',
+  GROQ_MODEL: 'llama-3.1-8b-instant',
   
   DEFAULT_CATEGORIES: [
     'Artificial Intelligence',

@@ -22,7 +22,8 @@
     "https://tiktok.com/*",
     "https://newsapi.org/*",
     "https://api.bytez.com/*",
-    "https://api.langsearch.com/*"
+    "https://api.langsearch.com/*",
+    "https://api.groq.com/*"
   ],
   "background": {
     "service_worker": "src/background/service-worker.js",
@@ -81,7 +82,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["src/pages/research.html", "src/pages/history.html"],
+      "resources": ["src/pages/research.html", "src/pages/history.html", "src/pages/chat.html"],
       "matches": ["<all_urls>"]
     }
   ]
