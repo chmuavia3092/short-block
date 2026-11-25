@@ -7,7 +7,7 @@ export const CONFIG = {
 
   GROQ_API_KEY: '',
   GROQ_API_BASE: 'https://api.groq.com/openai/v1/chat/completions',
-  GROQ_MODEL: 'llama-3.1-8b-instant',
+  GROQ_MODEL: 'qwen/qwen3.8-27b',
   
   DEFAULT_CATEGORIES: [
     'Artificial Intelligence',

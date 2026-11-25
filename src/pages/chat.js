@@ -102,10 +102,10 @@ class ChatPage {
           'Authorization': 'Bearer ' + apiKey
         },
         body: JSON.stringify({
-          model: CONFIG.GROQ_MODEL,
+          model: CONFIG.GROQ_MODEL || 'qwen/qwen3.8-27b',
           messages: this.history,
           temperature: 0.7,
-          max_tokens: 512
+          max_tokens: 1024
         })
       });
 
