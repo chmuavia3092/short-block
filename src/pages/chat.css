@@ -99,6 +99,20 @@ body {
   border-bottom-left-radius: 4px;
 }
 
+.chat-message.footer {
+  justify-content: center;
+}
+
+.footer-bubble {
+  max-width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  text-align: center;
+  padding: 8px 4px;
+}
+
 .chat-input-row {
   display: flex;
   gap: 8px;

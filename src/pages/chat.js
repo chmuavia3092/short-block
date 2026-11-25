@@ -3,6 +3,16 @@ import { escapeHtml } from '../utils/sanitize.js';
 
 const SYSTEM_PROMPT = `You are a focused productivity coach. You help users understand the psychology of distractions, build discipline, improve focus, and adopt practical productivity techniques. Keep answers concise, actionable, and encouraging. Avoid off-topic content.`;
 
+const WELCOME_MESSAGE = `Welcome! I’m glad you’re here.
+I’m here to gently support you with focus, discipline, and understanding distractions.
+How can I help you today?`;
+
+const FOOTER_MESSAGE = `———
+Made with care by M. Muavia Ibrahim
+Feel free to contact us: 03435322326
+You can also check out another project: https://pendooroots-site.vercel.app/
+Thank you for using this tool.`;
+
 class ChatPage {
   constructor() {
     this.history = [{ role: 'system', content: SYSTEM_PROMPT }];
@@ -122,6 +132,7 @@ class ChatPage {
       const reply = data?.choices?.[0]?.message?.content || 'No response.';
       this.history.push({ role: 'assistant', content: reply });
       this.appendMessage('assistant', reply);
+      this.appendFooter();
     } catch (error) {
       console.error('Chat error:', error);
       this.appendMessage('assistant', `Error: ${error.message || 'Please try again.'}`);
@@ -140,6 +151,19 @@ class ChatPage {
     const bubble = document.createElement('div');
     bubble.className = 'message-bubble';
     bubble.textContent = text;
+    div.appendChild(bubble);
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  appendFooter() {
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+    const div = document.createElement('div');
+    div.className = 'chat-message footer';
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble footer-bubble';
+    bubble.textContent = FOOTER_MESSAGE;
     div.appendChild(bubble);
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
