@@ -7,6 +7,14 @@ class PopupController {
     this.init();
   }
 
+  sendMessage(message) {
+    return new Promise((resolve) => {
+      chrome.runtime.sendMessage(message, (response) => {
+        resolve(response);
+      });
+    });
+  }
+
   async init() {
     this.bindEvents();
     await this.loadData();
@@ -99,6 +107,12 @@ class PopupController {
     await this.sendMessage({ type: 'SET_FOCUS_MODE', enabled });
     await this.sendMessage({ type: 'UPDATE_SETTING', key: 'globalMode', value: enabled });
     await this.loadFocusMode();
+
+    const timer = window.timerController;
+    if (timer) {
+      if (enabled) timer.startTimer();
+      else timer.pauseTimer();
+    }
   }
 
   async loadStats() {
@@ -274,6 +288,12 @@ class PopupController {
     if (!enabled) {
       this.unblockAllTabs();
     }
+
+    const timer = window.timerController;
+    if (timer) {
+      if (enabled) timer.startTimer();
+      else timer.pauseTimer();
+    }
   }
 
   unblockAllTabs() {
@@ -321,6 +341,13 @@ class TimerController {
   async init() {
     this.bindEvents();
     await this.loadTimerState();
+    if (this.isRunning) {
+      this.timerInterval = setInterval(() => {
+        this.elapsedSeconds++;
+        this.updateDisplay();
+        this.updateProgress();
+      }, 1000);
+    }
     this.updateDisplay();
   }
 
@@ -459,5 +486,5 @@ class TimerController {
 
 document.addEventListener('DOMContentLoaded', () => {
   const popupController = new PopupController();
-  new TimerController(popupController);
+  window.timerController = new TimerController(popupController);
 });
