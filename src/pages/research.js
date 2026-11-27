@@ -70,8 +70,22 @@ class ResearchPage {
 
   async init() {
     this.bindEvents();
+    await this.applyTheme();
     await this.loadBookmarks();
     await this.loadNews();
+  }
+
+  async applyTheme() {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        const stored = await new Promise((resolve) => {
+          chrome.storage.local.get('darkMode', (result) => resolve(result || {}));
+        });
+        document.documentElement.dataset.theme = stored.darkMode ? 'dark' : 'light';
+      }
+    } catch (e) {
+      // ignore
+    }
   }
 
   bindEvents() {

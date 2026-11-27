@@ -91,6 +91,8 @@ class PopupController {
     await this.loadSettings();
     await this.loadChartData();
     await this.loadGlobalMode();
+    const settings = await this.sendMessage({ type: 'GET_SETTINGS' });
+    document.documentElement.dataset.theme = settings.settings.darkMode ? 'dark' : 'light';
   }
 
   async loadFocusMode() {
@@ -205,6 +207,7 @@ class PopupController {
       key: 'darkMode',
       value: enabled
     });
+    document.documentElement.dataset.theme = enabled ? 'dark' : 'light';
   }
 
   async resetStats() {

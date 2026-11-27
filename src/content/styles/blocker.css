@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
   animation: focusGuardFadeIn 0.3s ease-out;
 }
 
@@ -92,19 +92,19 @@
 }
 
 .focus-guard-btn-primary {
-  background: #533afd;
-  color: #ffffff;
+  background: #f2a7c3;
+  color: #1a0d12;
   border: none;
 }
 
 .focus-guard-btn-primary:hover {
-  background: #4434d4;
+  background: #f7c2d4;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(83, 58, 253, 0.3);
+  box-shadow: 0 4px 12px rgba(242, 167, 195, 0.35);
 }
 
 .focus-guard-btn-primary:active {
-  background: #2e2b8c;
+  background: #e88fb0;
   transform: translateY(0);
 }
 

@@ -1,21 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@300;400;500;600&display=swap');
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --color-primary: #533afd;
-  --color-primary-press: #2e2b8c;
+  --font-display: 'Cormorant Garamond', 'Georgia', serif;
+  --font-body: 'Manrope', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --color-primary: #f2a7c3;
+  --color-primary-press: #f7c2d4;
   --color-surface: #ffffff;
-  --color-surface-soft: #f6f9fc;
-  --color-ink: #0d253d;
-  --color-ink-muted: #64748d;
-  --color-hairline: #e3e8ee;
-  --color-hairline-input: #a8c3de;
+  --color-surface-soft: #fdf0f3;
+  --color-ink: #1a0d12;
+  --color-ink-muted: #6b4a52;
+  --color-hairline: #eedfe3;
+  --color-hairline-input: #f2a7c3;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-pill: 9999px;
 }
 
+[data-theme="dark"] {
+  --color-primary: #f7b6c9;
+  --color-primary-press: #f9c5d5;
+  --color-surface: #1a1014;
+  --color-surface-soft: #24151b;
+  --color-ink: #f5ecef;
+  --color-ink-muted: #b89aa2;
+  --color-hairline: #3a242c;
+  --color-hairline-input: #f7b6c9;
+}
+
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  font-family: var(--font-body);
+}
+
+body {
+  font-family: var(--font-body);
   font-feature-settings: 'ss01';
   background: var(--color-surface-soft);
   color: var(--color-ink);
@@ -45,7 +64,8 @@ body {
 }
 
 .header-left { display: flex; align-items: center; gap: 12px; }
-.logo-text { font-size: 20px; font-weight: 300; color: var(--color-ink); letter-spacing: -0.4px; }
+.logo-text { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--color-ink); letter-spacing: -0.4px; }
+.logo-accent { color: var(--color-primary); }
 .header-right { display: flex; gap: 8px; }
 
 .icon-btn {
